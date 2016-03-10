@@ -201,7 +201,7 @@ function ode_civicrm_buildForm($formName, &$form) {
     
     $elements = & $form->getElement($fromField);
     $options = & $elements->_options;
-    suppressEmails($options, $showNotice);
+    ode_suppressEmails($options, $showNotice);
     
     if (empty($options)) {
       $options = array(array(
@@ -213,7 +213,7 @@ function ode_civicrm_buildForm($formName, &$form) {
   }  
 }
 
-function suppressEmails(&$fromEmailAddress, $showNotice) {
+function ode_suppressEmails(&$fromEmailAddress, $showNotice) {
   $config = CRM_Core_Config::singleton();
   $domain = get_domain($config->userFrameworkBaseURL);
   $isSSL = CRM_Core_BAO_Setting::getItem('CiviCRM Preferences', 'enableSSL');
@@ -247,8 +247,12 @@ function suppressEmails(&$fromEmailAddress, $showNotice) {
       $url = CRM_Utils_System::url('civicrm/admin/options/from_email_address', 'group=from_email_address&action=add&reset=1');
     }
     $status = ts('The Outbound Domain Enforcement extension has prevented the following From Email Address option(s) from being used as it uses a different domain than the System-generated Mail Settings From Email Address configured at Administer > Communications > Organization Address and Contact Info: %1'. $message , array( 1=> implode(', ', $invalidEmails), 2=> $url));
+    if ($showNotice === 'returnMessage') {
+      return array('msg' => $status);
+    }
     $session->setStatus($status, ts('Notice'));
   }
+  return NULL;
 }
 
 
@@ -436,3 +440,32 @@ function checkValidEmails() {
     CRM_Core_Session::singleton()->setStatus($errorMessage, ts('Notice'));
   }
 }
+
+function ode_civicrm_pageRun(&$page) {
+  if ($page->getVar('_name') == 'Civi\Angular\Page\Main') {
+    $domainFrom = CRM_Core_OptionGroup::values('from_email_address');
+    foreach ($domainFrom as $email) {
+      $domainEmails[] = array('text' => $email);
+    }
+    
+    $suppressEmails = ode_suppressEmails($domainEmails, 'returnMessage');
+    if ($suppressEmails) {
+      $fromEmailAddress = array();
+      foreach ($domainEmails as $email) {
+        $fromEmailAddress[] = $email['text'];
+      }
+      $suppressEmails['fromAddress'] = $fromEmailAddress;
+      $suppressEmails['mailings'] = array();
+      $suppressEmails['type'] = FALSE;
+      $suppressEmails['fromFields'] = array(
+        'Mailing' => array('fromAddress'),
+        'MailingAB' => array('fromAddressA', 'fromAddressB', 'fromAddress'),
+      );
+      
+      CRM_Core_Resources::singleton()
+        ->addScriptFile('biz.jmaconsulting.ode', 'js/ode_mailing.js')
+        ->addVars('odevariables', $suppressEmails);
+    }
+  }
+}
+
