@@ -291,6 +291,8 @@ function getWhiteListedDomains(): array {
       'wa.greens.org.au',
       'sa.greens.org.au',
       'tas.greens.org.au',
+      'elists.greens.org.au',
+      'elists.dev.greens.systems',
     ];
 }
 
