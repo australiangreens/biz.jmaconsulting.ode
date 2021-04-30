@@ -276,29 +276,22 @@ function ode_civicrm_buildForm($formName, &$form) {
 
 /**
  * Function to get Whitelisted domains
+ * Altered to return hard-coded greens.org.au domains
  *
  * @return array
  */
 function getWhiteListedDomains(): array {
-  $domain = get_domain(CRM_Core_Config::singleton()->userFrameworkBaseURL);
-  $isSSL = Civi::settings()->get('enableSSL');
-  if ($isSSL) {
-    preg_match('@^(?:https://)?([^/]+)@i', $domain, $matches);
-  }
-  else {
-    preg_match('@^(?:http://)?([^/]+)@i', $domain, $matches);
-  }
-
-  // for testing purpose on local
-  // $matches[1] = 'jmaconsulting.biz';
-  $domains = [$matches[1]];
-  $additionalDomains = civicrm_api3('OptionValue', 'get', ['option_group_id' => 'ode_whitelist']);
-  if (!empty($additionalDomains['values'])) {
-    foreach ($additionalDomains['values'] as $additionalDomain) {
-      $domains[] = $additionalDomain['label'];
-    }
-  }
-  return $domains;
+  return [
+      'greens.org.au',
+      'vic.greens.org.au',
+      'act.greens.org.au',
+      'nsw.greens.org.au',
+      'qld.greens.org.au',
+      'nt.greens.org.au',
+      'wa.greens.org.au',
+      'sa.greens.org.au',
+      'tas.greens.org.au',
+    ];
 }
 
 /**
