@@ -1,0 +1,9 @@
+{
+  "name": "australian_greens/biz.jmaconsulting.ode",
+  "type": "drupal-module",
+  "description": "Australian Greens fork of the Outbound Domain Enforcement (ODE) CiviCRM extension by JMA Consulting.",
+  "require": {
+    "composer/installers": "~1.0",
+    "drupal/drupal": "~7"
+  }
+}
